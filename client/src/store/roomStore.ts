@@ -1,0 +1,40 @@
+import { create } from 'zustand';
+import { Room, RoomMember } from '../types/room.types';
+
+interface RoomStore {
+  currentRoom: Room | null;
+  members: RoomMember[];
+  onlineUserIds: Set<string>;
+
+  setCurrentRoom: (room: Room | null) => void;
+  setMembers: (members: RoomMember[]) => void;
+  setUserOnline: (userId: string, status: 'online' | 'offline') => void;
+  addMember: (member: RoomMember) => void;
+  reset: () => void;
+}
+
+export const useRoomStore = create<RoomStore>((set) => ({
+  currentRoom: null,
+  members: [],
+  onlineUserIds: new Set(),
+
+  setCurrentRoom: (room) => set({ currentRoom: room }),
+
+  setMembers: (members) => set({ members }),
+
+  setUserOnline: (userId, status) =>
+    set((state) => {
+      const next = new Set(state.onlineUserIds);
+      if (status === 'online') next.add(userId);
+      else next.delete(userId);
+      return { onlineUserIds: next };
+    }),
+
+  addMember: (member) =>
+    set((state) => {
+      const exists = state.members.some((m) => m.userId === member.userId);
+      return exists ? state : { members: [...state.members, member] };
+    }),
+
+  reset: () => set({ currentRoom: null, members: [], onlineUserIds: new Set() }),
+}));

@@ -1,0 +1,125 @@
+# ─────────────────────────────────────────────────────────
+# Dependencies
+# ─────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ─────────────────────────────────────────────────────────
+# Environment Variables  ← NEVER commit secrets
+# ─────────────────────────────────────────────────────────
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+.env.staging
+
+# Keep example files so new devs know what vars are needed
+!.env.example
+!**/.env.example
+
+# ─────────────────────────────────────────────────────────
+# Build Outputs
+# ─────────────────────────────────────────────────────────
+# Server (TypeScript compiled output)
+server/dist/
+
+# Client (Vite production build)
+client/dist/
+client/build/
+
+# ─────────────────────────────────────────────────────────
+# Logs
+# ─────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ─────────────────────────────────────────────────────────
+# OS / IDE / Editor
+# ─────────────────────────────────────────────────────────
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# JetBrains (IntelliJ, WebStorm, etc.)
+.idea/
+*.iml
+*.iws
+
+# Vim / Emacs
+*.swp
+*.swo
+*~
+
+# ─────────────────────────────────────────────────────────
+# Testing
+# ─────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+*.lcov
+
+# ─────────────────────────────────────────────────────────
+# Docker
+# ─────────────────────────────────────────────────────────
+# Ignore local override files but keep the main compose file
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Docker volumes mounted locally
+postgres_data/
+mongo_data/
+redis_data/
+
+# ─────────────────────────────────────────────────────────
+# Vite / React specific
+# ─────────────────────────────────────────────────────────
+client/.vite/
+client/storybook-static/
+
+# ─────────────────────────────────────────────────────────
+# TypeScript
+# ─────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ─────────────────────────────────────────────────────────
+# Package manager locks (keep only one)
+# ─────────────────────────────────────────────────────────
+# Uncomment the lock file format you are NOT using:
+# yarn.lock
+# pnpm-lock.yaml
+
+# ─────────────────────────────────────────────────────────
+# Misc
+# ─────────────────────────────────────────────────────────
+*.pem
+*.key
+*.cert
+*.crt
+.cache/
+.temp/
+tmp/
