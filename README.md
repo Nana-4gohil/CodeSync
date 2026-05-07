@@ -1,229 +1,267 @@
-# CodeSync — Collaborative Code Editor
+# 🚀 CodeSync — Real-Time Collaborative Code Editor
 
-A **production-grade**, real-time collaborative code editor inspired by VS Code.
-
-Built with React, TypeScript, Monaco Editor, Node.js, Socket.IO, and PostgreSQL.
+<p align="center">
+  A modern real-time collaborative code editor inspired by VS Code.  
+  Built with the MERN stack, Socket.IO, and Monaco Editor.
+</p>
 
 ---
 
 ## ✨ Features
 
-| Feature | Details |
-|---|---|
-| 🔐 Auth | JWT access + refresh token rotation, logout-all sessions |
-| 👥 Collaboration | Real-time multi-cursor editing, presence indicators |
-| 💬 Chat | In-room chat with typing indicators and message history |
-| 📁 File System | Create, rename, delete files with auto-save |
-| ▶ Execution | Sandboxed JavaScript execution with output terminal |
-| 🎨 UI | VS Code-inspired dark theme, resizable panels |
-| 🚀 DevOps | Docker + Compose production setup |
+* 🔐 JWT Authentication & Protected Routes
+* 👥 Real-Time Collaborative Editing
+* ⚡ Live Cursor & Typing Indicators
+* 💬 Room-Based Realtime Chat
+* 📁 File Explorer & Multi-File Support
+* 🧠 Monaco Editor Integration
+* 🌙 VS Code Inspired Dark UI
+* 🔄 Auto Save Functionality
+* 🚀 Socket.IO Real-Time Architecture
+* 🐳 Docker Support
+* 📱 Responsive Design
 
 ---
 
-## 🏗️ Architecture
+# 🛠️ Tech Stack
 
-```
+## Frontend
+
+* React.js
+* TypeScript
+* Tailwind CSS
+* Monaco Editor
+* Zustand
+* React Router DOM
+* Axios
+* Socket.IO Client
+
+## Backend
+
+* Node.js
+* Express.js
+* Socket.IO
+* MongoDB
+* Mongoose
+* JWT Authentication
+* bcryptjs
+
+## DevOps & Tools
+
+* Docker
+* Docker Compose
+* Git & GitHub
+
+---
+
+# 📂 Project Structure
+
+```bash
 codesync/
-├── client/                     # React + TypeScript + Tailwind + Monaco
-│   └── src/
-│       ├── config/             # Axios instance, Socket.IO client
-│       ├── features/
-│       │   ├── auth/           # Login, Signup, ProtectedRoute
-│       │   ├── room/           # RoomList dashboard, RoomPage
-│       │   ├── editor/         # CodeEditor (Monaco), EditorTabs
-│       │   ├── filesystem/     # FileExplorer
-│       │   ├── chat/           # ChatPanel
-│       │   └── execution/      # TerminalPanel
-│       ├── store/              # Zustand: auth, editor, room
-│       ├── types/              # TypeScript interfaces
-│       └── components/ui/      # Shared UI components
 │
-├── server/                     # Node.js + Express + Socket.IO
-│   └── src/
-│       ├── config/             # env, db, jwt
-│       ├── db/                 # schema.sql, migrate.ts
-│       ├── middleware/         # auth, error, rateLimit, validate
-│       ├── features/
-│       │   ├── auth/           # signup/login/refresh/logout
-│       │   ├── rooms/          # CRUD + invite codes
-│       │   ├── files/          # CRUD + content update
-│       │   ├── chat/           # message history
-│       │   └── execution/      # VM2 sandboxed JS
-│       └── socket/
-│           ├── socket.manager.ts
-│           └── events/         # room, editor, chat events
+├── client/                         # React Frontend
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── features/
+│   │   ├── store/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   ├── layouts/
+│   │   └── utils/
+│
+├── server/                         # Node + Express Backend
+│   ├── src/
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── routes/
+│   │   ├── middleware/
+│   │   ├── models/
+│   │   ├── sockets/
+│   │   ├── services/
+│   │   └── utils/
 │
 ├── docker/
-│   ├── Dockerfile.server       # Multi-stage Node build
-│   └── Dockerfile.client       # Multi-stage Nginx build
-└── docker-compose.yml
+├── docker-compose.yml
+└── README.md
 ```
 
 ---
 
-## 🚀 Quick Start (Local Development)
+# ⚡ Real-Time Features
 
-### Prerequisites
-- Node.js 20+
-- PostgreSQL 15+
-- npm / pnpm
+## Collaborative Editing
 
-### 1. Clone & setup environment
+* Multiple users can edit simultaneously
+* Live code synchronization
+* Real-time cursor tracking
+* Presence indicators
+
+## Chat System
+
+* Room-based messaging
+* Typing indicators
+* Realtime communication
+
+## File Management
+
+* Create files
+* Rename files
+* Delete files
+* Auto-save support
+
+---
+
+# 🔌 Socket Events
+
+## Client → Server
+
+| Event           | Description             |
+| --------------- | ----------------------- |
+| `room:join`     | Join collaborative room |
+| `room:leave`    | Leave room              |
+| `editor:change` | Sync code changes       |
+| `editor:cursor` | Sync cursor position    |
+| `chat:send`     | Send message            |
+
+---
+
+## Server → Client
+
+| Event                  | Description              |
+| ---------------------- | ------------------------ |
+| `room:user-joined`     | User joined room         |
+| `room:members`         | Active room members      |
+| `editor:remote-change` | Receive code updates     |
+| `editor:remote-cursor` | Receive cursor updates   |
+| `chat:message`         | Receive realtime message |
+
+---
+
+# 🔒 Authentication & Security
+
+* JWT Access & Refresh Tokens
+* Password Hashing using bcrypt
+* Protected API Routes
+* Socket Authentication Middleware
+* Rate Limiting
+* Environment Variable Protection
+
+---
+
+# 🚀 Getting Started
+
+## 1️⃣ Clone Repository
 
 ```bash
-git clone <repo>
+git clone https://github.com/yourusername/codesync.git
 cd codesync
-
-# Server env
-cp server/.env.example server/.env
-# Edit server/.env — set DATABASE_URL and JWT secrets
-
-# Client env
-cp client/.env.example client/.env
 ```
 
-### 2. Database setup
+---
+
+## 2️⃣ Setup Backend
 
 ```bash
-# Create DB
-psql -U postgres -c "CREATE USER codesync WITH PASSWORD 'codesync_pass';"
-psql -U postgres -c "CREATE DATABASE codesync_db OWNER codesync;"
-
-# Run migrations
 cd server
 npm install
-npm run db:migrate
 ```
 
-### 3. Start the server
+Create `.env`
+
+```env
+PORT=4000
+MONGO_URI=your_mongodb_connection
+JWT_SECRET=your_secret
+CLIENT_URL=http://localhost:5173
+```
+
+Run Backend
 
 ```bash
-cd server
 npm run dev
-# Server: http://localhost:4000
-# Socket: ws://localhost:4000
 ```
 
-### 4. Start the client
+---
+
+## 3️⃣ Setup Frontend
 
 ```bash
 cd client
 npm install
 npm run dev
-# Client: http://localhost:5173
 ```
 
 ---
 
-## 🐳 Docker (Production)
+# 🐳 Docker Setup
 
 ```bash
-# Set secrets
-export JWT_ACCESS_SECRET="your_very_long_random_secret_here"
-export JWT_REFRESH_SECRET="your_other_very_long_random_secret"
-export CLIENT_ORIGIN="http://your-domain.com"
-
-# Build and run all services
-docker-compose up --build -d
-
-# Services:
-#   Client  → http://localhost:80
-#   Server  → http://localhost:4000
-#   Postgres → localhost:5432
-#   Redis   → localhost:6379
+docker-compose up --build
 ```
 
 ---
 
-## 🔌 Socket Event Architecture
+# 🌍 Environment Variables
 
-### Client → Server
-| Event | Payload |
-|---|---|
-| `room:join` | `{ roomId }` |
-| `room:leave` | `{ roomId }` |
-| `editor:change` | `{ roomId, fileId, content, version }` |
-| `editor:cursor` | `{ roomId, fileId, position }` |
-| `editor:selection` | `{ roomId, fileId, selection }` |
-| `editor:typing` | `{ roomId, fileId }` |
-| `chat:send` | `{ roomId, content }` |
-| `chat:typing-start` | `{ roomId }` |
-| `chat:typing-stop` | `{ roomId }` |
+## Server `.env`
 
-### Server → Client
-| Event | Payload |
-|---|---|
-| `room:members` | `{ members[] }` |
-| `room:user-joined` | `{ user, members[] }` |
-| `room:presence` | `{ userId, status }` |
-| `editor:remote-change` | `{ userId, fileId, content, version }` |
-| `editor:remote-cursor` | `{ userId, fileId, position, color }` |
-| `chat:message` | `{ id, userId, username, content, createdAt }` |
-| `chat:typing-users` | `{ userIds[], usernames[] }` |
+```env
+PORT=4000
+MONGO_URI=
+JWT_SECRET=
+CLIENT_URL=
+```
 
 ---
 
-## 📡 API Reference
+# 📸 Screenshots
 
-### Auth
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | `/api/auth/signup` | ❌ | Register |
-| POST | `/api/auth/login` | ❌ | Login |
-| POST | `/api/auth/refresh` | ❌ | Rotate refresh token |
-| POST | `/api/auth/logout` | ❌ | Revoke one token |
-| POST | `/api/auth/logout-all` | ✅ | Revoke all tokens |
-| GET | `/api/auth/me` | ✅ | Current user |
+> Add screenshots of:
 
-### Rooms
-| Method | Path | Description |
-|---|---|---|
-| GET | `/api/rooms` | User's rooms |
-| POST | `/api/rooms` | Create room |
-| POST | `/api/rooms/join` | Join by invite code |
-| GET | `/api/rooms/:id` | Room detail |
-| PATCH | `/api/rooms/:id` | Update room |
-| DELETE | `/api/rooms/:id` | Delete room |
-| GET | `/api/rooms/:id/members` | Room members |
-| POST | `/api/rooms/:id/regenerate-invite` | New invite code |
-
-### Files
-| Method | Path | Description |
-|---|---|---|
-| GET | `/api/rooms/:roomId/files` | List files |
-| POST | `/api/rooms/:roomId/files` | Create file |
-| GET | `/api/rooms/:roomId/files/:id` | Get file |
-| PATCH | `/api/rooms/:roomId/files/:id/content` | Update content |
-| PATCH | `/api/rooms/:roomId/files/:id/rename` | Rename file |
-| DELETE | `/api/rooms/:roomId/files/:id` | Delete file |
-
-### Chat & Execution
-| Method | Path | Description |
-|---|---|---|
-| GET | `/api/rooms/:roomId/messages` | Message history |
-| POST | `/api/execute` | Execute JS code |
+* Editor UI
+* Collaborative editing
+* Chat panel
+* File explorer
 
 ---
 
-## 🔒 Security
+# 🎯 Future Improvements
 
-- Passwords hashed with **bcrypt** (12 rounds)
-- JWT refresh token **rotation + family revocation** (reuse detection)
-- Code execution in **VM2 sandbox** — no file system, no require(), 5s timeout
-- **Helmet** for HTTP security headers
-- **Rate limiting** — 100 req/15min global, 10 req/15min for auth, 20 req/min for execution
-- **Zod** validation on all API inputs
+* Video Calling
+* Voice Chat
+* AI Code Suggestions
+* Multi-language Execution
+* Operational Transform / CRDT
+* Room Permissions
+* Git Integration
 
 ---
 
-## 🧪 Tech Stack
+# 🧠 Learning Outcomes
 
-| Layer | Tech |
-|---|---|
-| Frontend | React 18, TypeScript, Tailwind CSS, Monaco Editor, Zustand, React Router v6 |
-| Backend | Node.js 20, Express, Socket.IO 4, TypeScript |
-| Database | PostgreSQL 16 |
-| Auth | JWT (access + refresh), bcryptjs |
-| Realtime | Socket.IO WebSocket + polling fallback |
-| Execution | VM2 sandboxed runtime |
-| DevOps | Docker, Docker Compose, Nginx |
+This project helped in understanding:
+
+* WebSocket Architecture
+* Real-Time Systems
+* MERN Stack Development
+* State Management
+* Authentication Flows
+* Scalable Backend Architecture
+* Collaborative Systems Design
+
+---
+
+# 📜 License
+
+This project is licensed under the MIT License.
+
+---
+
+# 👨‍💻 Author
+
+### Shivam (Nana) Gohil
+
+* Full Stack Developer
+* Interested in Realtime Systems & Backend Engineering
+* Passionate about scalable collaborative applications
