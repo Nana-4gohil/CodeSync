@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const {
-  getRooms, createRoom, joinRoom,
+  getRooms, createRoom, joinRoom, leaveRoom,
   getRoom, updateRoom, deleteRoom,
   getMembers, regenerateInvite,
 } = require('../controllers/room.controller');
@@ -30,6 +30,9 @@ router.patch('/:id', updateRoom);
 
 // DELETE /api/rooms/:id       — delete room (owner only)
 router.delete('/:id', deleteRoom);
+
+// POST   /api/rooms/:id/leave     — leave room (non-owners only)
+router.post('/:id/leave', leaveRoom);
 
 // GET    /api/rooms/:id/members
 router.get('/:id/members', getMembers);

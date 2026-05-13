@@ -142,6 +142,30 @@ async function updateRoom(req, res, next) {
   }
 }
 
+// POST /api/rooms/:id/leave — remove self from room (non-owners only)
+async function leaveRoom(req, res, next) {
+  try {
+    const room = await getRoomForUser(req.params.id, req.user.userId);
+
+    const memberEntry = room.members.find((m) => m.user.toString() === req.user.userId);
+    if (!memberEntry) throw new AppError('You are not a member of this room.', 404);
+
+    if (memberEntry.role === 'owner') {
+      throw new AppError(
+        'Owners cannot leave a room. Transfer ownership or delete the room instead.',
+        403
+      );
+    }
+
+    room.members = room.members.filter((m) => m.user.toString() !== req.user.userId);
+    await room.save();
+
+    res.json({ success: true, message: 'You have left the room.' });
+  } catch (err) {
+    next(err);
+  }
+}
+
 // DELETE /api/rooms/:id
 async function deleteRoom(req, res, next) {
   try {
@@ -206,12 +230,7 @@ async function regenerateInvite(req, res, next) {
 }
 
 module.exports = {
-  getRooms,
-  createRoom,
-  joinRoom,
-  getRoom,
-  updateRoom,
-  deleteRoom,
-  getMembers,
-  regenerateInvite,
+  getRooms, createRoom, joinRoom, leaveRoom,
+  getRoom, updateRoom, deleteRoom,
+  getMembers, regenerateInvite,
 };

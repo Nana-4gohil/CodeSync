@@ -31,6 +31,10 @@ export const roomService = {
     await api.delete(`/rooms/${roomId}`);
   },
 
+  async leaveRoom(roomId: string) {
+    await api.post(`/rooms/${roomId}/leave`);
+  },
+
   async regenerateInvite(roomId: string) {
     const { data } = await api.post(`/rooms/${roomId}/regenerate-invite`);
     return data.data.inviteCode as string;

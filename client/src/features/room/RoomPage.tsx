@@ -36,8 +36,40 @@ export const RoomPage: React.FC = () => {
   const [sidebarPanel, setSidebarPanel] = useState<SidebarPanel>('explorer');
   const [bottomPanel, setBottomPanel] = useState<BottomPanel>('terminal');
   const [showInvite, setShowInvite] = useState(false);
+  const [showRoomMenu, setShowRoomMenu] = useState(false);
 
-  const activeFile = files.find((f) => f.id === activeFileId) ?? null;
+  const activeFile  = files.find((f) => f.id === activeFileId) ?? null;
+  const isOwner     = currentRoom?.ownerId === user?.id;
+
+  // ── Leave room ─────────────────────────────────────────────────────────────
+  async function handleLeaveRoom() {
+    if (!roomId) return;
+    if (!confirm('Leave this room? You can rejoin via the invite link.')) return;
+    try {
+      await roomService.leaveRoom(roomId);
+      socket.emit('room:leave', { roomId });
+      navigate('/');
+      toast.success('Left the room');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? 'Failed to leave room');
+    }
+    setShowRoomMenu(false);
+  }
+
+  // ── Delete room ────────────────────────────────────────────────────────────
+  async function handleDeleteRoom() {
+    if (!roomId) return;
+    if (!confirm(`Permanently delete "${currentRoom?.name}"? This cannot be undone.`)) return;
+    try {
+      await roomService.deleteRoom(roomId);
+      socket.emit('room:leave', { roomId });
+      navigate('/');
+      toast.success('Room deleted');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? 'Failed to delete room');
+    }
+    setShowRoomMenu(false);
+  }
 
   // ── Load room + files ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -188,6 +220,68 @@ export const RoomPage: React.FC = () => {
           )}
 
           <Avatar username={user?.username ?? ''} color={user?.avatarColor} size="xs" />
+
+          {/* ── Room actions dropdown ──────────────────────────────────── */}
+          <div className="relative">
+            <button
+              id="room-menu-btn"
+              title="Room options"
+              onClick={() => setShowRoomMenu((v) => !v)}
+              className="w-6 h-6 flex items-center justify-center rounded hover:bg-white/10
+                         text-[#888] hover:text-white transition-colors"
+            >
+              {/* ⋮ vertical ellipsis */}
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="5"  r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="12" cy="19" r="1.5" />
+              </svg>
+            </button>
+
+            {showRoomMenu && (
+              <>
+                {/* click-away backdrop */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowRoomMenu(false)}
+                />
+                <div className="absolute top-8 right-0 z-50 bg-surface-800 border border-editor-border
+                               rounded-xl py-1 shadow-2xl min-w-[170px] animate-fade-in">
+                  {/* Leave — only for non-owners */}
+                  {!isOwner && (
+                    <button
+                      id="leave-room-btn"
+                      onClick={handleLeaveRoom}
+                      className="w-full text-left px-3 py-2 text-xs text-amber-400
+                                 hover:bg-amber-500/10 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Leave Room
+                    </button>
+                  )}
+
+                  {/* Delete — only for owner */}
+                  {isOwner && (
+                    <button
+                      id="delete-room-btn"
+                      onClick={handleDeleteRoom}
+                      className="w-full text-left px-3 py-2 text-xs text-red-400
+                                 hover:bg-red-500/10 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Delete Room
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
