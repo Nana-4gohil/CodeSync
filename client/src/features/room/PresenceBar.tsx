@@ -9,9 +9,7 @@ interface PresenceBarProps {
 
 const IDLE_TIMEOUT_MS = 30_000; // 30 seconds
 
-/** Darken a hex color slightly for idle state */
 function withOpacity(color: string, opacity: number): string {
-  // If color is in #rrggbb form, convert to rgba
   const hex = color?.replace('#', '');
   if (!hex || hex.length < 6) return color ?? '#888';
   const r = parseInt(hex.slice(0, 2), 16);
@@ -24,17 +22,26 @@ export const PresenceBar: React.FC<PresenceBarProps> = ({ roomId }) => {
   const socket = getSocket();
   const { user } = useAuthStore();
   const { members, onlineUserIds, userActivity, setUserActivity } = useRoomStore();
-  const [localIdle, setLocalIdle] = useState(false);
   const [tooltip, setTooltip] = useState<string | null>(null);
-  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const onlineMembers = members.filter((m) => onlineUserIds.has(m.userId));
+  // Stable ref for local userId — avoids stale closure in idle callbacks
+  const userIdRef  = useRef(user?.id ?? '');
+  useEffect(() => { userIdRef.current = user?.id ?? ''; }, [user?.id]);
 
-  // ── Remote presence events ────────────────────────────────────────────────
+  // Ref-based idle flag — mutation never triggers effect re-run
+  const isIdleRef  = useRef(false);
+  const [, forceRender] = useState(0);
+  const idleTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const roomIdRef  = useRef(roomId);
+  useEffect(() => { roomIdRef.current = roomId; }, [roomId]);
+
+  // ── Remote presence events (server broadcasts to ALL including self) ───────
+  // We update the store for EVERY userId received — including our own.
+  // This is the single source of truth; local isIdleRef is only for the
+  // visual fast-path (no round-trip needed for self).
   useEffect(() => {
     const onIdle   = ({ userId }: { userId: string }) => setUserActivity(userId, 'idle');
     const onActive = ({ userId }: { userId: string }) => setUserActivity(userId, 'active');
-
     socket.on('presence:remote-idle',   onIdle);
     socket.on('presence:remote-active', onActive);
     return () => {
@@ -43,41 +50,53 @@ export const PresenceBar: React.FC<PresenceBarProps> = ({ roomId }) => {
     };
   }, [socket, setUserActivity]);
 
-  // ── Local idle detection ──────────────────────────────────────────────────
+  // ── Local idle detection — runs ONCE ──────────────────────────────────────
   useEffect(() => {
-    function resetIdle() {
-      if (localIdle) {
-        setLocalIdle(false);
-        setUserActivity(user?.id ?? '', 'active');
-        socket.emit('presence:active', { roomId });
-      }
+    function scheduleIdle() {
       if (idleTimer.current) clearTimeout(idleTimer.current);
       idleTimer.current = setTimeout(() => {
-        setLocalIdle(true);
-        setUserActivity(user?.id ?? '', 'idle');
-        socket.emit('presence:idle', { roomId });
+        if (!isIdleRef.current) {
+          isIdleRef.current = true;
+          forceRender((n) => n + 1);
+          // Server echoes this back to us via io.to(roomId), which updates the store
+          socket.emit('presence:idle', { roomId: roomIdRef.current });
+        }
       }, IDLE_TIMEOUT_MS);
     }
 
-    window.addEventListener('mousemove', resetIdle);
-    window.addEventListener('keydown',   resetIdle);
-    resetIdle(); // kick off on mount
+    function onActivity() {
+      if (isIdleRef.current) {
+        isIdleRef.current = false;
+        forceRender((n) => n + 1);
+        socket.emit('presence:active', { roomId: roomIdRef.current });
+      }
+      scheduleIdle();
+    }
+
+    window.addEventListener('mousemove', onActivity);
+    window.addEventListener('keydown',   onActivity);
+    scheduleIdle();
 
     return () => {
-      window.removeEventListener('mousemove', resetIdle);
-      window.removeEventListener('keydown',   resetIdle);
+      window.removeEventListener('mousemove', onActivity);
+      window.removeEventListener('keydown',   onActivity);
       if (idleTimer.current) clearTimeout(idleTimer.current);
     };
-  }, [localIdle, roomId, socket, user?.id, setUserActivity]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onlineMembers = members.filter((m) => onlineUserIds.has(m.userId));
 
   return (
     <div className="flex items-center gap-0.5">
       {onlineMembers.map((m) => {
-        const isLocal  = m.userId === user?.id;
-        const activity = isLocal ? (localIdle ? 'idle' : 'active') : (userActivity.get(m.userId) ?? 'active');
-        const isIdle   = activity === 'idle';
-        const initial  = m.username.charAt(0).toUpperCase();
-        const color    = m.avatarColor ?? '#6366f1';
+        // isLocal: compare against user.id (auth store field) which equals socket.user.userId
+        const isLocal   = m.userId === user?.id;
+        // For self: use fast-path ref (no round-trip delay).
+        // For remote: use store (updated by socket echo).
+        const isIdle    = isLocal ? isIdleRef.current : userActivity.get(m.userId) === 'idle';
+        const initial   = m.username.charAt(0).toUpperCase();
+        const color     = m.avatarColor ?? '#6366f1';
         const ringColor = isIdle ? withOpacity(color, 0.35) : color;
 
         return (
@@ -101,7 +120,7 @@ export const PresenceBar: React.FC<PresenceBarProps> = ({ roomId }) => {
               {initial}
             </div>
 
-            {/* Idle moon badge */}
+            {/* Idle badge */}
             {isIdle && (
               <span className="absolute -bottom-0.5 -right-0.5 text-[9px] leading-none select-none">
                 💤

@@ -18,6 +18,7 @@ import { ResizablePanel } from '../../components/ui/ResizablePanel';
 import { Avatar } from '../../components/ui/Avatar';
 import { Spinner } from '../../components/ui/Spinner';
 import { RoomMemberPayload } from '../../types/socket.types';
+import { PresenceBar } from './PresenceBar';
 
 type SidebarPanel = 'explorer' | 'chat' | 'members';
 type BottomPanel = 'terminal' | 'none';
@@ -147,23 +148,8 @@ export const RoomPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Online members */}
-          <div className="flex items-center -space-x-1.5">
-            {members.slice(0, 4).map((m) => (
-              <Avatar
-                key={m.userId}
-                username={m.username}
-                color={m.avatarColor}
-                size="xs"
-                online={onlineUserIds.has(m.userId)}
-              />
-            ))}
-            {members.length > 4 && (
-              <div className="w-5 h-5 rounded-full bg-surface-700 flex items-center justify-center text-[8px] text-[#888] border border-surface-900">
-                +{members.length - 4}
-              </div>
-            )}
-          </div>
+          {/* Google Docs-style presence — colored avatar per online user, 💤 when idle */}
+          <PresenceBar roomId={roomId!} />
 
           {/* Invite button */}
           <button
