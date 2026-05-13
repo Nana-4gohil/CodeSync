@@ -46,13 +46,34 @@ async function createRoom(req, res, next) {
       members: [{ user: req.user.userId, role: 'owner' }],
     });
 
-    // Create a default starter file for the room
+    // Create a language-appropriate starter file for the room
+    const STARTERS = {
+      javascript: { name: 'index.js',    content: '// Welcome to CodeSync!\nconsole.log("Hello, World!");\n' },
+      typescript: { name: 'index.ts',    content: '// Welcome to CodeSync!\nconst greeting: string = "Hello, World!";\nconsole.log(greeting);\n' },
+      python:     { name: 'main.py',     content: '# Welcome to CodeSync!\nprint("Hello, World!")\n' },
+      java:       { name: 'Main.java',   content: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}\n' },
+      cpp:        { name: 'main.cpp',    content: '#include <iostream>\n\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}\n' },
+      c:          { name: 'main.c',      content: '#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}\n' },
+      go:         { name: 'main.go',     content: 'package main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("Hello, World!")\n}\n' },
+      rust:       { name: 'main.rs',     content: 'fn main() {\n    println!("Hello, World!");\n}\n' },
+      csharp:     { name: 'Program.cs',  content: 'using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello, World!");\n    }\n}\n' },
+      php:        { name: 'index.php',   content: '<?php\necho "Hello, World!";\n' },
+      ruby:       { name: 'main.rb',     content: '# Welcome to CodeSync!\nputs "Hello, World!"\n' },
+      swift:      { name: 'main.swift',  content: 'import Foundation\n\nprint("Hello, World!")\n' },
+      kotlin:     { name: 'Main.kt',     content: 'fun main() {\n    println("Hello, World!")\n}\n' },
+      html:       { name: 'index.html',  content: '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8" />\n  <title>CodeSync</title>\n</head>\n<body>\n  <h1>Hello, World!</h1>\n</body>\n</html>\n' },
+      css:        { name: 'style.css',   content: '/* Welcome to CodeSync! */\nbody {\n  font-family: sans-serif;\n  margin: 0;\n  padding: 1rem;\n}\n' },
+      sql:        { name: 'query.sql',   content: '-- Welcome to CodeSync!\nSELECT \'Hello, World!\' AS greeting;\n' },
+      shell:      { name: 'script.sh',   content: '#!/bin/bash\n# Welcome to CodeSync!\necho "Hello, World!"\n' },
+      markdown:   { name: 'README.md',   content: '# Hello, World!\n\nWelcome to **CodeSync** — your collaborative code editor.\n' },
+    };
+    const starter = STARTERS[language] ?? STARTERS.javascript;
     await File.create({
       room: room._id,
-      name: 'index.js',
-      path: '/index.js',
-      content: '// Welcome to CodeSync!\nconsole.log("Hello, World!");\n',
-      language: 'javascript',
+      name: starter.name,
+      path: `/${starter.name}`,
+      content: starter.content,
+      language,
       createdBy: req.user.userId,
     });
 
