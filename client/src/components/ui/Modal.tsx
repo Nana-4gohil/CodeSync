@@ -7,6 +7,7 @@ interface ModalProps {
   children: React.ReactNode;
 }
 
+
 export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
 

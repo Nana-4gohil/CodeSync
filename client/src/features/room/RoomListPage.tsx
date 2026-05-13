@@ -199,10 +199,11 @@ export const RoomListPage: React.FC = () => {
 
                 <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5">
                   <span className="text-xs text-[#666]">
-                    {formatDistanceToNow(new Date(room.updated_at), { addSuffix: true })}
+                  
+                    {formatDistanceToNow(new Date(room.updatedAt), { addSuffix: true })}
                   </span>
                   <span className="text-xs text-[#666]">
-                    {room.is_public ? '🌐 Public' : '🔒 Private'}
+                    {room.isPublic ? '🌐 Public' : '🔒 Private'}
                   </span>
                 </div>
               </div>

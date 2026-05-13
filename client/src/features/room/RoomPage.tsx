@@ -57,6 +57,11 @@ export const RoomPage: React.FC = () => {
         if (roomFiles.length > 0) {
           useEditorStore.getState().openFile(roomFiles[0]);
         }
+
+        // Join the socket room after data is loaded.
+        // Doing it here (not in a separate effect) prevents the loading-state
+        // re-render from triggering room:leave via the other effect's cleanup.
+        socket.emit('room:join', { roomId });
       } catch {
         toast.error('Failed to load room');
         navigate('/');
@@ -73,9 +78,8 @@ export const RoomPage: React.FC = () => {
 
   // ── Socket room events ─────────────────────────────────────────────────────
   useEffect(() => {
-    if (!roomId || loading) return;
+    if (!roomId) return;
 
-    socket.emit('room:join', { roomId });
 
     const onMembers = ({ members }: { members: RoomMemberPayload[] }) => {
       setMembers(members as RoomMember[]);
@@ -101,7 +105,7 @@ export const RoomPage: React.FC = () => {
       socket.off('room:user-joined', onUserJoined);
       socket.off('room:presence', onPresence);
     };
-  }, [roomId, loading]);
+  }, [roomId]); // NOT [roomId,loading] - loading change must not fire cleanup (room:leave)
 
   // ── Files state sync ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -119,7 +123,7 @@ export const RoomPage: React.FC = () => {
     );
   }
 
-  const inviteUrl = `${window.location.origin}/invite/${currentRoom?.invite_code}`;
+  const inviteUrl = `${window.location.origin}/invite/${currentRoom?.inviteCode}`;
 
   return (
     <div className="h-screen flex flex-col bg-editor-bg overflow-hidden">
@@ -193,7 +197,7 @@ export const RoomPage: React.FC = () => {
                   Copy
                 </button>
               </div>
-              <p className="text-[10px] text-[#555] mt-2">Code: <span className="font-mono text-[#888]">{currentRoom?.invite_code}</span></p>
+              <p className="text-[10px] text-[#555] mt-2">Code: <span className="font-mono text-[#888]">{currentRoom?.inviteCode}</span></p>
             </div>
           )}
 
@@ -309,6 +313,8 @@ export const RoomPage: React.FC = () => {
             >
               <EditorArea activeFile={activeFile} roomId={roomId!} />
               <TerminalPanel
+                roomId={roomId!}
+                fileId={activeFile?.id ?? ''}
                 code={activeFile?.content ?? ''}
                 language={activeFile?.language ?? 'javascript'}
               />

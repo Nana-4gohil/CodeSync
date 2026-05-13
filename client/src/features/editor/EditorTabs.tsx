@@ -19,6 +19,7 @@ const FILE_ICONS: Record<string, string> = {
   default: '📄',
 };
 
+
 export const EditorTabs: React.FC<EditorTabsProps> = ({ files }) => {
   const { openFileIds, activeFileId, isDirty, setActiveFile, closeFile } = useEditorStore();
 

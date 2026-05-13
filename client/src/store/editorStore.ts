@@ -11,7 +11,8 @@ interface EditorStore {
   openFile: (file: EditorFile) => void;
   closeFile: (fileId: string) => void;
   setActiveFile: (fileId: string) => void;
-  updateFileContent: (fileId: string, content: string) => void;
+  updateFileContent: (fileId: string, content: string) => void;  // local edits → marks dirty
+  applyRemoteContent: (fileId: string, content: string) => void; // remote edits → no dirty
   markClean: (fileId: string) => void;
   addFile: (file: EditorFile) => void;
   removeFile: (fileId: string) => void;
@@ -65,7 +66,17 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       files: state.files.map((f) =>
         f.id === fileId ? { ...f, content } : f,
       ),
-      isDirty: { ...state.isDirty, [fileId]: true },
+      isDirty: { ...state.isDirty, [fileId]: true }, // local edit → mark dirty
+    }));
+  },
+
+  // Remote changes: update content WITHOUT touching isDirty
+  applyRemoteContent: (fileId, content) => {
+    set((state) => ({
+      files: state.files.map((f) =>
+        f.id === fileId ? { ...f, content } : f,
+      ),
+      // isDirty intentionally NOT changed
     }));
   },
 

@@ -4,12 +4,12 @@ export interface Room {
   id: string;
   name: string;
   description: string | null;
-  owner_id: string;
+  ownerId: string;
   language: string;
-  is_public: boolean;
-  invite_code: string;
-  created_at: string;
-  updated_at: string;
+  isPublic: boolean;
+  inviteCode: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface RoomMember {
