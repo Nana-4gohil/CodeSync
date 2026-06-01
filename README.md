@@ -19,7 +19,6 @@
 * 🔄 Auto Save Functionality
 * 🚀 Socket.IO Real-Time Architecture
 * 🐳 Docker Support
-* 📱 Responsive Design
 
 ---
 
